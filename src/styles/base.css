@@ -1,0 +1,21 @@
+:root {
+  --green-700: #1b5e20;
+  --green-600: #2e7d32;
+  --green-100: #e8f5e9;
+  --white: #ffffff;
+  --text: #163019;
+  --title-size: 1.45rem;
+  --subtitle-size: 1.1rem;
+  --body-size: 0.95rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, var(--green-100) 0%, var(--white) 100%);
+  color: var(--text);
+}

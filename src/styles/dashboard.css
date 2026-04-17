@@ -1,0 +1,154 @@
+.dashboard-layout {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dashboard-intro {
+  margin: 1.25rem 0 0;
+}
+
+.dashboard-intro h1 {
+  margin: 0;
+  color: var(--green-700);
+  font-size: var(--title-size);
+}
+
+.dashboard-intro p {
+  margin: 0.35rem 0 0;
+  color: #4d6f50;
+  font-size: var(--body-size);
+}
+
+.dashboard-costs {
+  margin-top: 1rem;
+}
+
+.dashboard-month-filter {
+  margin-bottom: 0.75rem;
+  max-width: 260px;
+}
+
+.dashboard-panels {
+  max-width: 1100px;
+  margin: 1rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-panel {
+  background: var(--white);
+  border: 1px solid #cde9d0;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(27, 94, 32, 0.08);
+}
+
+.dashboard-panel h3 {
+  margin: 0 0 0.75rem;
+  color: var(--green-700);
+  font-size: var(--subtitle-size);
+}
+
+.dashboard-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #e0f1e1;
+  font-size: var(--body-size);
+}
+
+.dashboard-list-item span:last-child {
+  color: #3f6b43;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-product-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--green-700);
+  cursor: pointer;
+}
+
+.dashboard-product-link:hover {
+  text-decoration: underline;
+}
+
+.dashboard-list-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-empty {
+  margin: 0;
+  color: #527356;
+  font-size: var(--body-size);
+}
+
+.app-nav {
+  max-width: 1100px;
+  margin: 1rem auto 0;
+  padding: 0;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-nav-btn {
+  border: 1px solid #b8ddb9;
+  background: var(--white);
+  color: var(--green-700);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-nav-btn-active {
+  background: var(--green-600);
+  color: var(--white);
+  border-color: var(--green-600);
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout {
+    margin: 0 1rem;
+  }
+
+  .dashboard-intro {
+    margin-top: 1rem;
+  }
+
+  .dashboard-intro h1 {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-panels {
+    margin: 1rem 0 0;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-nav {
+    margin: 1rem 1rem 0;
+    flex-wrap: wrap;
+  }
+}
