@@ -122,11 +122,48 @@
   justify-self: start;
 }
 
+.equipment-sheet-maintenance {
+  margin-top: 1rem;
+  border-top: 1px solid #d8edd9;
+  padding-top: 0.9rem;
+}
+
+.equipment-sheet-maintenance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.equipment-sheet-maintenance-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.equipment-sheet-maintenance-header h4 {
+  margin: 0;
+  color: var(--green-700);
+  font-size: var(--subtitle-size);
+}
+
+.equipment-sheet-maintenance-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.45rem;
+  color: #36593a;
+}
+
+.equipment-sheet-maintenance-empty {
+  margin: 0.75rem 0 0;
+  color: #5d7c61;
+  font-style: italic;
+}
+
 @media (max-width: 900px) {
   .equipment {
     margin: 1rem;
     padding: 1rem;
-    overflow-x: auto;
   }
 
   .equipment table {
@@ -148,5 +185,68 @@
 
   .controls-reset {
     width: 100%;
+  }
+
+  .equipment-sheet-maintenance-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .equipment-sheet-maintenance-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 700px) {
+  .equipment table,
+  .equipment thead,
+  .equipment tbody,
+  .equipment th,
+  .equipment td,
+  .equipment tr {
+    display: block;
+  }
+
+  .equipment thead {
+    display: none;
+  }
+
+  .equipment tbody tr {
+    background: var(--white);
+    border: 1px solid #d8edd9;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem;
+  }
+
+  .equipment td {
+    border: none;
+    border-bottom: 1px dashed #e0f1e1;
+    display: grid;
+    grid-template-columns: minmax(110px, 40%) 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.92rem;
+  }
+
+  .equipment td:last-child {
+    border-bottom: none;
+  }
+
+  .equipment td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--green-700);
+  }
+
+  .equipment .empty-table-cell {
+    display: block;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .equipment .empty-table-cell::before {
+    content: none;
   }
 }

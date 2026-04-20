@@ -7,6 +7,7 @@ export function useMaintenance() {
     const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
     const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(null);
     const [isMaintenanceFormOpen, setIsMaintenanceFormOpen] = useState(false);
+    const [isReadOnlyMaintenanceModal, setIsReadOnlyMaintenanceModal] = useState(false);
     const [editingMaintenanceId, setEditingMaintenanceId] = useState<number | null>(null);
     const [maintenanceFormData, setMaintenanceFormData] = useState<MaintenanceFormData>(emptyMaintenanceFormData);
 
@@ -27,6 +28,7 @@ export function useMaintenance() {
     function openAddMaintenanceForm(equipmentId: number) {
         setSelectedEquipmentId(equipmentId);
         setEditingMaintenanceId(null);
+        setIsReadOnlyMaintenanceModal(false);
         setMaintenanceFormData(emptyMaintenanceFormData);
         setIsMaintenanceFormOpen(true);
     }
@@ -34,6 +36,7 @@ export function useMaintenance() {
     function openEditMaintenanceForm(record: MaintenanceRecord) {
         setSelectedEquipmentId(record.equipmentId);
         setEditingMaintenanceId(record.id);
+        setIsReadOnlyMaintenanceModal(false);
         setMaintenanceFormData({
             date: record.date,
             interventionType: record.interventionType,
@@ -45,6 +48,27 @@ export function useMaintenance() {
             cost: record.cost
         });
         setIsMaintenanceFormOpen(true);
+    }
+
+    function openReadOnlyMaintenanceForm(record: MaintenanceRecord) {
+        setSelectedEquipmentId(record.equipmentId);
+        setEditingMaintenanceId(record.id);
+        setIsReadOnlyMaintenanceModal(true);
+        setMaintenanceFormData({
+            date: record.date,
+            interventionType: record.interventionType,
+            interventionStatus: record.interventionStatus,
+            description: record.description,
+            performedBy: record.performedBy,
+            downtimeHours: record.downtimeHours,
+            notes: record.notes,
+            cost: record.cost
+        });
+        setIsMaintenanceFormOpen(true);
+    }
+
+    function enableMaintenanceEditMode() {
+        setIsReadOnlyMaintenanceModal(false);
     }
 
     function handleMaintenanceFieldChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -59,6 +83,10 @@ export function useMaintenance() {
 
     function handleMaintenanceSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (isReadOnlyMaintenanceModal) {
+            return;
+        }
 
         if (isEditingMaintenance && editingMaintenanceId !== null) {
             setMaintenanceList((currentList) =>
@@ -86,6 +114,7 @@ export function useMaintenance() {
     function closeFormOnly() {
         setIsMaintenanceFormOpen(false);
         setEditingMaintenanceId(null);
+        setIsReadOnlyMaintenanceModal(false);
     }
 
     return {
@@ -94,6 +123,7 @@ export function useMaintenance() {
         selectedEquipmentId,
         setSelectedEquipmentId,
         isMaintenanceFormOpen,
+        isReadOnlyMaintenanceModal,
         editingMaintenanceId,
         maintenanceFormData,
         isEditingMaintenance,
@@ -101,6 +131,8 @@ export function useMaintenance() {
         closeMaintenanceModal,
         openAddMaintenanceForm,
         openEditMaintenanceForm,
+        openReadOnlyMaintenanceForm,
+        enableMaintenanceEditMode,
         handleMaintenanceFieldChange,
         handleMaintenanceSubmit,
         closeFormOnly

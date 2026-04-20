@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import EquipmentForm from './components/EquipmentForm';
+import MaintenanceForm from './components/MaintenanceForm';
 import Equipment from './Equipment';
 import Maintenances from './Maintenances';
 import { useEquipment } from './hooks/useEquipment';
@@ -217,9 +219,20 @@ function Dashboard({ equipmentList, maintenanceList, onOpenEquipment }: Readonly
 export default function App() {
     const equipment = useEquipment();
     const maintenance = useMaintenance();
+    const location = useLocation();
+    const [isDashboardSheetMaintenanceVisible, setIsDashboardSheetMaintenanceVisible] = useState(false);
+
+    function toggleDashboardSheetMaintenanceVisibility() {
+        setIsDashboardSheetMaintenanceVisible((currentValue) => {
+            if (currentValue) {
+                return false;
+            }
+            return true;
+        });
+    }
 
     useEffect(() => {
-        const isAnyModalOpen = equipment.isModalOpen || maintenance.isMaintenanceFormOpen;
+        const isAnyModalOpen = equipment.isEquipmentFormOpen || maintenance.isMaintenanceFormOpen;
 
         if (isAnyModalOpen) {
             document.body.classList.add('modal-open');
@@ -230,7 +243,7 @@ export default function App() {
         return () => {
             document.body.classList.remove('modal-open');
         };
-    }, [equipment.isModalOpen, maintenance.isMaintenanceFormOpen]);
+    }, [equipment.isEquipmentFormOpen, maintenance.isMaintenanceFormOpen]);
 
     function openEquipmentSheet(equipmentId: number) {
         const equipmentItem = equipment.equipmentList.find((item) => item.id === equipmentId);
@@ -238,12 +251,87 @@ export default function App() {
             return;
         }
 
-        equipment.openReadOnlyModal(equipmentItem);
+        setIsDashboardSheetMaintenanceVisible(false);
+        equipment.openReadOnlyEquipmentForm(equipmentItem);
+    }
+
+    function startMaintenanceFromEquipmentSheet(equipmentId: number) {
+        equipment.closeEquipmentForm();
+        maintenance.openAddMaintenanceForm(equipmentId);
+    }
+
+    function renderGlobalMaintenanceModal() {
+        if (!maintenance.isMaintenanceFormOpen || location.pathname === '/maintenances') {
+            return null;
+        }
+
+        let modalTitle = 'Ajouter une maintenance';
+        if (maintenance.isReadOnlyMaintenanceModal) {
+            modalTitle = 'Fiche maintenance';
+        } else if (maintenance.isEditingMaintenance) {
+            modalTitle = 'Modifier une maintenance';
+        }
+
+        return (
+            <div className="modal-overlay">
+                <div className="modal">
+                    <div className="modal-header">
+                        <h3>{modalTitle}</h3>
+                        <div className="modal-header-actions">
+                            {maintenance.isReadOnlyMaintenanceModal && (
+                                <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={maintenance.enableMaintenanceEditMode}
+                                >
+                                    Modifier la fiche
+                                </button>
+                            )}
+                            <button type="button" className="btn-secondary" onClick={maintenance.closeFormOnly}>
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                    <MaintenanceForm
+                        maintenance={maintenance}
+                        equipmentList={equipment.equipmentList}
+                        onCancel={maintenance.closeFormOnly}
+                    />
+                </div>
+            </div>
+        );
     }
 
     function renderDashboardEquipmentSheetModal() {
-        if (!equipment.isModalOpen || !equipment.isReadOnlyModal) {
+        if (!equipment.isEquipmentFormOpen || location.pathname !== '/dashboard') {
             return null;
+        }
+
+        const currentEquipmentId = equipment.editingEquipmentId;
+        const equipmentMaintenances = currentEquipmentId === null
+            ? []
+            : maintenance.maintenanceList
+                .filter((record) => record.equipmentId === currentEquipmentId)
+                .sort((left, right) => right.date.localeCompare(left.date));
+        let historyToggleLabel = 'Afficher la liste';
+        if (isDashboardSheetMaintenanceVisible) {
+            historyToggleLabel = 'Masquer la liste';
+        }
+        let historyContent: ReactNode = null;
+        if (isDashboardSheetMaintenanceVisible) {
+            if (equipmentMaintenances.length === 0) {
+                historyContent = <p className="equipment-sheet-maintenance-empty">Aucune maintenance enregistrée pour cet équipement.</p>;
+            } else {
+                historyContent = (
+                    <ul className="equipment-sheet-maintenance-list">
+                        {equipmentMaintenances.map((record) => (
+                            <li key={record.id}>
+                                <strong>{formatDate(record.date)}</strong> - {record.interventionType} ({record.interventionStatus}) - {record.description}
+                            </li>
+                        ))}
+                    </ul>
+                );
+            }
         }
 
         return (
@@ -251,45 +339,48 @@ export default function App() {
                 <div className="modal">
                     <div className="modal-header">
                         <h3>Fiche équipement</h3>
-                        <button type="button" className="btn-secondary" onClick={equipment.closeModal}>
-                            Fermer
-                        </button>
+                        <div className="modal-header-actions">
+                            {equipment.isReadOnlyEquipmentModal && (
+                                <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={equipment.enableEquipmentEditMode}
+                                >
+                                    Modifier la fiche
+                                </button>
+                            )}
+                            <button type="button" className="btn-secondary" onClick={equipment.closeEquipmentForm}>
+                                Fermer
+                            </button>
+                        </div>
                     </div>
+                    <EquipmentForm equipment={equipment} onCancel={equipment.closeEquipmentForm} />
 
-                    <form className="equipment-form">
-                        <label>
-                            <span>Nom</span>
-                            <input value={equipment.formData.name} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Marque</span>
-                            <input value={equipment.formData.brand} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Modèle</span>
-                            <input value={equipment.formData.model} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Numéro de série</span>
-                            <input value={equipment.formData.serialNumber} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Date d'achat</span>
-                            <input value={formatDate(equipment.formData.purchaseDate)} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Expiration de garantie</span>
-                            <input value={formatDate(equipment.formData.warrantyExpiration)} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Statut</span>
-                            <input value={equipment.formData.status} readOnly disabled />
-                        </label>
-                        <label>
-                            <span>Position</span>
-                            <input value={equipment.formData.position} readOnly disabled />
-                        </label>
-                    </form>
+                    <section className="equipment-sheet-maintenance">
+                        <div className="equipment-sheet-maintenance-header">
+                            <h4>Historique des maintenances ({equipmentMaintenances.length})</h4>
+                                <div className="equipment-sheet-maintenance-actions">
+                                    <button
+                                        type="button"
+                                        className="btn-secondary"
+                                        onClick={toggleDashboardSheetMaintenanceVisibility}
+                                    >
+                                        {historyToggleLabel}
+                                    </button>
+                                    {currentEquipmentId !== null && (
+                                        <button
+                                            type="button"
+                                            className="btn-primary"
+                                            onClick={() => startMaintenanceFromEquipmentSheet(currentEquipmentId)}
+                                        >
+                                            Ajouter une maintenance
+                                        </button>
+                                    )}
+                                </div>
+                        </div>
+
+                        {historyContent}
+                    </section>
                 </div>
             </div>
         );
@@ -329,12 +420,22 @@ export default function App() {
                         />
                     }
                 />
-                <Route path="/equipements" element={<Equipment equipment={equipment} />} />
+                <Route
+                    path="/equipements"
+                    element={
+                        <Equipment
+                            equipment={equipment}
+                            maintenanceList={maintenance.maintenanceList}
+                            onAddMaintenanceForEquipment={startMaintenanceFromEquipmentSheet}
+                        />
+                    }
+                />
                 <Route path="/maintenances" element={<Maintenances equipment={equipment} maintenance={maintenance} />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
 
             {renderDashboardEquipmentSheetModal()}
+            {renderGlobalMaintenanceModal()}
         </div>
     );
 }

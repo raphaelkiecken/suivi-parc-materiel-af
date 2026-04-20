@@ -120,7 +120,6 @@
   .maintenance-page {
     margin: 1rem;
     padding: 1rem;
-    overflow-x: auto;
   }
 
   .maintenance-table {
@@ -134,5 +133,59 @@
 
   .maintenance-form {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .maintenance-table,
+  .maintenance-table thead,
+  .maintenance-table tbody,
+  .maintenance-table th,
+  .maintenance-table td,
+  .maintenance-table tr {
+    display: block;
+  }
+
+  .maintenance-table thead {
+    display: none;
+  }
+
+  .maintenance-table tbody tr {
+    background: var(--white);
+    border: 1px solid #d8edd9;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem;
+  }
+
+  .maintenance-table td {
+    border: none;
+    border-bottom: 1px dashed #e0f1e1;
+    display: grid;
+    grid-template-columns: minmax(115px, 42%) 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.92rem;
+    white-space: normal;
+  }
+
+  .maintenance-table td:last-child {
+    border-bottom: none;
+  }
+
+  .maintenance-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--green-700);
+  }
+
+  .maintenance-empty-table-cell {
+    display: block;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .maintenance-empty-table-cell::before {
+    content: none;
   }
 }

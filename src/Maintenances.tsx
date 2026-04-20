@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import './styles/maintenance-page.css';
+import MaintenanceForm from './components/MaintenanceForm';
 import type { UseEquipmentReturn } from './hooks/useEquipment';
 import type { UseMaintenanceReturn } from './hooks/useMaintenance';
 import { formatDate } from './utils/dateUtils';
@@ -40,138 +41,43 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
         return equipmentItem ? `${equipmentItem.name} - ${equipmentItem.serialNumber}` : 'Équipement supprimé';
     }
 
-    function renderMaintenanceForm() {
-        return (
-            <form className="maintenance-form" onSubmit={maintenance.handleMaintenanceSubmit}>
-                <label>
-                    <span>Équipement</span>
-                    <select
-                        value={maintenance.selectedEquipmentId ?? ''}
-                        onChange={(event) => maintenance.setSelectedEquipmentId(Number(event.target.value))}
-                        disabled={maintenance.isEditingMaintenance}
-                        required
-                    >
-                        {equipment.equipmentList.map((item) => (
-                            <option key={item.id} value={item.id}>
-                                {item.name} - {item.serialNumber}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label>
-                    <span>Date</span>
-                    <input
-                        type="date"
-                        name="date"
-                        value={maintenance.maintenanceFormData.date}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        required
-                    />
-                </label>
-                <label>
-                    <span>Type de maintenance</span>
-                    <select
-                        name="interventionType"
-                        value={maintenance.maintenanceFormData.interventionType}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        required
-                    >
-                        <option value="Préventive">Préventive</option>
-                        <option value="Corrective">Corrective</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Statut</span>
-                    <select
-                        name="interventionStatus"
-                        value={maintenance.maintenanceFormData.interventionStatus}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        required
-                    >
-                        <option value="Planifiée">Planifiée</option>
-                        <option value="En cours">En cours</option>
-                        <option value="Terminée">Terminée</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Description</span>
-                    <input
-                        name="description"
-                        value={maintenance.maintenanceFormData.description}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        required
-                    />
-                </label>
-                <label>
-                    <span>Effectuée par</span>
-                    <input
-                        name="performedBy"
-                        value={maintenance.maintenanceFormData.performedBy}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        required
-                    />
-                </label>
-                <label>
-                    <span>Durée d'immobilisation (h)</span>
-                    <input
-                        type="number"
-                        name="downtimeHours"
-                        value={maintenance.maintenanceFormData.downtimeHours}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        step="0.5"
-                        min="0"
-                        required
-                    />
-                </label>
-                <label>
-                    <span>Coût (€)</span>
-                    <input
-                        type="number"
-                        name="cost"
-                        value={maintenance.maintenanceFormData.cost}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        step="0.01"
-                        min="0"
-                        required
-                    />
-                </label>
-                <label className="maintenance-notes-field">
-                    <span>Notes intervention</span>
-                    <textarea
-                        name="notes"
-                        value={maintenance.maintenanceFormData.notes}
-                        onChange={maintenance.handleMaintenanceFieldChange}
-                        rows={3}
-                    />
-                </label>
-
-                <div className="form-actions">
-                    <button type="submit" className="btn-primary">
-                        {maintenance.isEditingMaintenance ? 'Enregistrer les modifications' : 'Ajouter'}
-                    </button>
-                    <button type="button" className="btn-secondary" onClick={maintenance.closeFormOnly}>
-                        Annuler
-                    </button>
-                </div>
-            </form>
-        );
-    }
-
     function renderMaintenanceModal() {
         if (!maintenance.isMaintenanceFormOpen) {
             return null;
+        }
+
+        let modalTitle = 'Ajouter une maintenance';
+        if (maintenance.isReadOnlyMaintenanceModal) {
+            modalTitle = 'Fiche maintenance';
+        } else if (maintenance.isEditingMaintenance) {
+            modalTitle = 'Modifier une maintenance';
         }
 
         return (
             <div className="modal-overlay">
                 <div className="modal">
                     <div className="modal-header">
-                        <h3>{maintenance.isEditingMaintenance ? 'Modifier une maintenance' : 'Ajouter une maintenance'}</h3>
-                        <button type="button" className="btn-secondary" onClick={maintenance.closeFormOnly}>
-                            Fermer
-                        </button>
+                        <h3>{modalTitle}</h3>
+                        <div className="modal-header-actions">
+                            {maintenance.isReadOnlyMaintenanceModal && (
+                                <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={maintenance.enableMaintenanceEditMode}
+                                >
+                                    Modifier la fiche
+                                </button>
+                            )}
+                            <button type="button" className="btn-secondary" onClick={maintenance.closeFormOnly}>
+                                Fermer
+                            </button>
+                        </div>
                     </div>
-                    {renderMaintenanceForm()}
+                    <MaintenanceForm
+                        maintenance={maintenance}
+                        equipmentList={equipment.equipmentList}
+                        onCancel={maintenance.closeFormOnly}
+                    />
                 </div>
             </div>
         );
@@ -236,18 +142,18 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
                                 <tr
                                     key={record.id}
                                     className="clickable-row"
-                                    onClick={() => maintenance.openEditMaintenanceForm(record)}
-                                    title="Cliquer pour modifier"
+                                    onClick={() => maintenance.openReadOnlyMaintenanceForm(record)}
+                                    title="Cliquer pour ouvrir la fiche"
                                 >
-                                    <td>{formatDate(record.date)}</td>
-                                    <td>{getEquipmentNameById(record.equipmentId)}</td>
-                                    <td>{record.interventionType}</td>
-                                    <td>{record.interventionStatus}</td>
-                                    <td>{record.description}</td>
-                                    <td>{record.performedBy}</td>
-                                    <td>{record.downtimeHours.toFixed(1)} h</td>
-                                    <td className="nowrap">{record.cost.toFixed(2)} €</td>
-                                    <td>{record.notes || '-'}</td>
+                                    <td data-label="Date">{formatDate(record.date)}</td>
+                                    <td data-label="Equipement">{getEquipmentNameById(record.equipmentId)}</td>
+                                    <td data-label="Type">{record.interventionType}</td>
+                                    <td data-label="Statut">{record.interventionStatus}</td>
+                                    <td data-label="Description">{record.description}</td>
+                                    <td data-label="Effectuee par">{record.performedBy}</td>
+                                    <td data-label="Immobilisation">{record.downtimeHours.toFixed(1)} h</td>
+                                    <td data-label="Cout" className="nowrap">{record.cost.toFixed(2)} €</td>
+                                    <td data-label="Notes">{record.notes || '-'}</td>
                                 </tr>
                             ))
                         )}

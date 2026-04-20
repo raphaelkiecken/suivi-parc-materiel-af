@@ -7,16 +7,16 @@ export type SortDirection = 'asc' | 'desc';
 
 export function useEquipment() {
     const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialEquipmentData);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isReadOnlyModal, setIsReadOnlyModal] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [formData, setFormData] = useState<EquipmentFormData>(emptyEquipmentFormData);
+    const [isEquipmentFormOpen, setIsEquipmentFormOpen] = useState(false);
+    const [isReadOnlyEquipmentModal, setIsReadOnlyEquipmentModal] = useState(false);
+    const [editingEquipmentId, setEditingEquipmentId] = useState<number | null>(null);
+    const [equipmentFormData, setEquipmentFormData] = useState<EquipmentFormData>(emptyEquipmentFormData);
     const [searchQuery, setSearchQuery] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
     const [sortField, setSortField] = useState<SortField>('purchaseDate');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-    const isEditing = editingId !== null;
+    const isEditingEquipment = editingEquipmentId !== null;
     const availableLocations = useMemo(
         () => [...new Set(equipmentList.map((item) => item.position))].sort((a, b) => a.localeCompare(b, 'fr')),
         [equipmentList]
@@ -55,17 +55,8 @@ export function useEquipment() {
         });
     }, [equipmentList, locationFilter, searchQuery, sortDirection, sortField]);
 
-    function openAddModal() {
-        setEditingId(null);
-        setIsReadOnlyModal(false);
-        setFormData(emptyEquipmentFormData);
-        setIsModalOpen(true);
-    }
-
-    function openEditModal(item: EquipmentItem) {
-        setEditingId(item.id);
-        setIsReadOnlyModal(false);
-        setFormData({
+    function setEquipmentFormFromItem(item: EquipmentItem) {
+        setEquipmentFormData({
             name: item.name,
             brand: item.brand,
             model: item.model,
@@ -75,33 +66,41 @@ export function useEquipment() {
             status: item.status,
             position: item.position
         });
-        setIsModalOpen(true);
     }
 
-    function openReadOnlyModal(item: EquipmentItem) {
-        setEditingId(item.id);
-        setIsReadOnlyModal(true);
-        setFormData({
-            name: item.name,
-            brand: item.brand,
-            model: item.model,
-            serialNumber: item.serialNumber,
-            purchaseDate: item.purchaseDate,
-            warrantyExpiration: item.warrantyExpiration,
-            status: item.status,
-            position: item.position
-        });
-        setIsModalOpen(true);
+    function openAddEquipmentForm() {
+        setEditingEquipmentId(null);
+        setIsReadOnlyEquipmentModal(false);
+        setEquipmentFormData(emptyEquipmentFormData);
+        setIsEquipmentFormOpen(true);
     }
 
-    function closeModal() {
-        setIsModalOpen(false);
-        setIsReadOnlyModal(false);
+    function openEditEquipmentForm(item: EquipmentItem) {
+        setEditingEquipmentId(item.id);
+        setIsReadOnlyEquipmentModal(false);
+        setEquipmentFormFromItem(item);
+        setIsEquipmentFormOpen(true);
     }
 
-    function handleFieldChange(event: ChangeEvent<HTMLInputElement>) {
+    function openReadOnlyEquipmentForm(item: EquipmentItem) {
+        setEditingEquipmentId(item.id);
+        setIsReadOnlyEquipmentModal(true);
+        setEquipmentFormFromItem(item);
+        setIsEquipmentFormOpen(true);
+    }
+
+    function closeEquipmentForm() {
+        setIsEquipmentFormOpen(false);
+        setIsReadOnlyEquipmentModal(false);
+    }
+
+    function enableEquipmentEditMode() {
+        setIsReadOnlyEquipmentModal(false);
+    }
+
+    function handleEquipmentFieldChange(event: ChangeEvent<HTMLInputElement>) {
         const { name, value } = event.target;
-        setFormData((currentData) => ({
+        setEquipmentFormData((currentData) => ({
             ...currentData,
             [name]: value
         }));
@@ -114,19 +113,19 @@ export function useEquipment() {
         setSortDirection('desc');
     }
 
-    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
+    function handleEquipmentSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (isReadOnlyModal) {
-            closeModal();
+        if (isReadOnlyEquipmentModal) {
+            closeEquipmentForm();
             return;
         }
 
-        if (isEditing) {
+        if (isEditingEquipment && editingEquipmentId !== null) {
             setEquipmentList((currentList) =>
                 currentList.map((item) =>
-                    item.id === editingId
-                        ? { id: item.id, ...formData }
+                    item.id === editingEquipmentId
+                        ? { id: item.id, ...equipmentFormData }
                         : item
                 )
             );
@@ -137,32 +136,33 @@ export function useEquipment() {
 
             setEquipmentList((currentList) => [
                 ...currentList,
-                { id: nextId, ...formData }
+                { id: nextId, ...equipmentFormData }
             ]);
         }
 
-        closeModal();
+        closeEquipmentForm();
     }
 
     return {
         equipmentList,
         displayedEquipmentList,
         availableLocations,
-        isModalOpen,
-        isReadOnlyModal,
-        editingId,
-        formData,
-        isEditing,
+        isEquipmentFormOpen,
+        isReadOnlyEquipmentModal,
+        editingEquipmentId,
+        equipmentFormData,
+        isEditingEquipment,
         searchQuery,
         locationFilter,
         sortField,
         sortDirection,
-        openAddModal,
-        openEditModal,
-        openReadOnlyModal,
-        closeModal,
-        handleFieldChange,
-        handleSubmit,
+        openAddEquipmentForm,
+        openEditEquipmentForm,
+        openReadOnlyEquipmentForm,
+        enableEquipmentEditMode,
+        closeEquipmentForm,
+        handleEquipmentFieldChange,
+        handleEquipmentSubmit,
         setSearchQuery,
         setLocationFilter,
         setSortField,
