@@ -43,7 +43,7 @@ export function useMaintenance() {
             interventionStatus: record.interventionStatus,
             description: record.description,
             performedBy: record.performedBy,
-            downtimeHours: record.downtimeHours,
+            downtimeMinutes: record.downtimeMinutes,
             notes: record.notes,
             cost: record.cost
         });
@@ -60,7 +60,7 @@ export function useMaintenance() {
             interventionStatus: record.interventionStatus,
             description: record.description,
             performedBy: record.performedBy,
-            downtimeHours: record.downtimeHours,
+            downtimeMinutes: record.downtimeMinutes,
             notes: record.notes,
             cost: record.cost
         });
@@ -73,7 +73,7 @@ export function useMaintenance() {
 
     function handleMaintenanceFieldChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
         const { name, value } = event.target;
-        const numericFields = ['cost', 'downtimeHours'];
+        const numericFields = ['cost', 'downtimeMinutes'];
         const finalValue = numericFields.includes(name) ? Number.parseFloat(value) || 0 : value;
         setMaintenanceFormData((currentData) => ({
             ...currentData,

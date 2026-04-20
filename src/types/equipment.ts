@@ -18,7 +18,7 @@ export interface MaintenanceRecord {
     interventionStatus: 'Planifiée' | 'En cours' | 'Terminée';
     description: string;
     performedBy: string;
-    downtimeHours: number;
+    downtimeMinutes: number;
     notes: string;
     cost: number;
 }

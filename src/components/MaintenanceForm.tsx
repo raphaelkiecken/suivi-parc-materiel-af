@@ -91,13 +91,13 @@ export default function MaintenanceForm({ maintenance, equipmentList, onCancel }
                 />
             </label>
             <label>
-                <span>Durée d'immobilisation (h)</span>
+                <span>Durée d'immobilisation (min)</span>
                 <input
                     type="number"
-                    name="downtimeHours"
-                    value={maintenance.maintenanceFormData.downtimeHours}
+                    name="downtimeMinutes"
+                    value={maintenance.maintenanceFormData.downtimeMinutes}
                     onChange={maintenance.handleMaintenanceFieldChange}
-                    step="0.5"
+                    step="1"
                     min="0"
                     disabled={isReadOnly}
                     required

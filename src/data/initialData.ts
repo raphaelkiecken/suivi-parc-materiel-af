@@ -177,7 +177,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Terminée',
         description: 'Remplacement du clavier défectueux',
         performedBy: 'IT interne',
-        downtimeHours: 1.5,
+        downtimeMinutes: 90,
         notes: 'Clavier changé, BIOS mis à jour.',
         cost: 95
     },
@@ -189,7 +189,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Terminée',
         description: 'Graissage et contrôle des courroies',
         performedBy: 'Tech Boulangerie Services',
-        downtimeHours: 2,
+        downtimeMinutes: 120,
         notes: 'RAS sur le moteur. Prochaine visite dans 6 mois.',
         cost: 180
     },
@@ -201,7 +201,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Terminée',
         description: 'Sonde de température recalibrée',
         performedBy: 'Rational SAV',
-        downtimeHours: 3,
+        downtimeMinutes: 180,
         notes: 'Test de montée en température validé.',
         cost: 240
     },
@@ -213,7 +213,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'En cours',
         description: 'Contrôle d\'étanchéité et nettoyage condenseur',
         performedBy: 'Froid Nord Maintenance',
-        downtimeHours: 1,
+        downtimeMinutes: 60,
         notes: 'Intervention en deux passages, fin prévue demain.',
         cost: 120
     },
@@ -225,7 +225,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Planifiée',
         description: 'Détartrage complet et changement joint groupe',
         performedBy: 'Nespresso Pro Service',
-        downtimeHours: 1,
+        downtimeMinutes: 60,
         notes: 'Machine de prêt demandée pour la durée de l\'intervention.',
         cost: 85
     },
@@ -237,7 +237,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Planifiée',
         description: 'Remplacement pompe de vidange',
         performedBy: 'Winterhalter SAV',
-        downtimeHours: 4,
+        downtimeMinutes: 240,
         notes: 'Pièce en attente de livraison.',
         cost: 430
     },
@@ -249,7 +249,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Planifiée',
         description: 'Nettoyage évaporateur et contrôle thermostat',
         performedBy: 'Froid Nord Maintenance',
-        downtimeHours: 1.5,
+        downtimeMinutes: 90,
         notes: 'Intervention calée hors production.',
         cost: 110
     },
@@ -261,7 +261,7 @@ export const initialMaintenanceData: MaintenanceRecord[] = [
         interventionStatus: 'Terminée',
         description: 'Lecteur CB remplacé',
         performedBy: 'Prestataire monétique',
-        downtimeHours: 0.5,
+        downtimeMinutes: 30,
         notes: 'Paramétrage terminal validé en caisse.',
         cost: 70
     }
@@ -284,7 +284,7 @@ export const emptyMaintenanceFormData: MaintenanceFormData = {
     interventionStatus: 'Planifiée',
     description: '',
     performedBy: '',
-    downtimeHours: 0,
+    downtimeMinutes: 0,
     notes: '',
     cost: 0
 };

@@ -193,7 +193,7 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
                             <th>Statut</th>
                             <th>Description</th>
                             <th>Effectuée par</th>
-                            <th>Immobilisation</th>
+                            <th>Immobilisation (min)</th>
                             <th className="nowrap">Coût</th>
                             <th>Notes</th>
                         </tr>
@@ -219,7 +219,7 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
                                     <td data-label="Statut">{record.interventionStatus}</td>
                                     <td data-label="Description">{record.description}</td>
                                     <td data-label="Effectuee par">{record.performedBy}</td>
-                                    <td data-label="Immobilisation">{record.downtimeHours.toFixed(1)} h</td>
+                                    <td data-label="Immobilisation">{record.downtimeMinutes} min</td>
                                     <td data-label="Cout" className="nowrap">{record.cost.toFixed(2)} €</td>
                                     <td data-label="Notes">{record.notes || '-'}</td>
                                 </tr>
