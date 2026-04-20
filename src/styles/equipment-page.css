@@ -199,6 +199,10 @@
 }
 
 @media (max-width: 700px) {
+  .table-wrap {
+    overflow-x: visible;
+  }
+
   .equipment table,
   .equipment thead,
   .equipment tbody,
@@ -220,6 +224,11 @@
     padding: 0.6rem;
   }
 
+  .equipment table {
+    min-width: 0;
+    width: 100%;
+  }
+
   .equipment td {
     border: none;
     border-bottom: 1px dashed #e0f1e1;
@@ -228,6 +237,8 @@
     gap: 0.5rem;
     padding: 0.5rem 0;
     font-size: 0.92rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .equipment td:last-child {

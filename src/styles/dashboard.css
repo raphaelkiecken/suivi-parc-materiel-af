@@ -152,3 +152,22 @@
     flex-wrap: wrap;
   }
 }
+
+@media (max-width: 700px) {
+  .dashboard-costs .table-wrap {
+    overflow-x: visible;
+  }
+
+  .dashboard-costs .maintenance-table {
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .dashboard-costs .maintenance-table th,
+  .dashboard-costs .maintenance-table td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+}
