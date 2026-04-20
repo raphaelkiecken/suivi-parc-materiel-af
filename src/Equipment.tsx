@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import './styles/equipment-page.css';
 import EquipmentForm from './components/EquipmentForm';
 import type { UseEquipmentReturn } from './hooks/useEquipment';
@@ -18,6 +18,16 @@ interface EquipmentProps {
 
 export default function Equipment({ equipment, maintenanceList, onAddMaintenanceForEquipment }: Readonly<EquipmentProps>) {
     const [isMaintenanceHistoryVisible, setIsMaintenanceHistoryVisible] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [requestedPage, setRequestedPage] = useState(1);
+
+    const totalItems = equipment.displayedEquipmentList.length;
+    const totalPages = useMemo(() => Math.max(1, Math.ceil(totalItems / itemsPerPage)), [itemsPerPage, totalItems]);
+    const currentPage = Math.min(requestedPage, totalPages);
+    const paginatedEquipmentList = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return equipment.displayedEquipmentList.slice(startIndex, startIndex + itemsPerPage);
+    }, [currentPage, equipment.displayedEquipmentList, itemsPerPage]);
 
     function toggleMaintenanceHistoryVisibility() {
         setIsMaintenanceHistoryVisible((currentValue) => {
@@ -63,7 +73,10 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                     <input
                         type="text"
                         value={equipment.searchQuery}
-                        onChange={(event) => equipment.setSearchQuery(event.target.value)}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            equipment.setSearchQuery(event.target.value);
+                        }}
                         placeholder="Nom, marque, modèle, n° série..."
                     />
                 </label>
@@ -72,7 +85,10 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                     <span>Lieu</span>
                     <select
                         value={equipment.locationFilter}
-                        onChange={(event) => equipment.setLocationFilter(event.target.value)}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            equipment.setLocationFilter(event.target.value);
+                        }}
                     >
                         <option value="">Tous les lieux</option>
                         {equipment.availableLocations.map((location) => (
@@ -87,7 +103,10 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                     <span>Trier par</span>
                     <select
                         value={equipment.sortField}
-                        onChange={(event) => equipment.setSortField(event.target.value as typeof equipment.sortField)}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            equipment.setSortField(event.target.value as typeof equipment.sortField);
+                        }}
                     >
                         {sortFieldOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -101,14 +120,40 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                     <span>Ordre</span>
                     <select
                         value={equipment.sortDirection}
-                        onChange={(event) => equipment.setSortDirection(event.target.value as typeof equipment.sortDirection)}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            equipment.setSortDirection(event.target.value as typeof equipment.sortDirection);
+                        }}
                     >
                         <option value="asc">Croissant</option>
                         <option value="desc">Décroissant</option>
                     </select>
                 </label>
 
-                <button type="button" className="btn-secondary controls-reset" onClick={equipment.resetFilters}>
+                <label className="control-field">
+                    <span>Par page</span>
+                    <select
+                        value={itemsPerPage}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            setItemsPerPage(Number(event.target.value));
+                        }}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                    </select>
+                </label>
+
+                <button
+                    type="button"
+                    className="btn-secondary controls-reset"
+                    onClick={() => {
+                        setRequestedPage(1);
+                        equipment.resetFilters();
+                    }}
+                >
                     Réinitialiser
                 </button>
             </section>
@@ -217,6 +262,42 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                 {equipment.displayedEquipmentList.length} équipement(s) affiché(s)
             </p>
 
+            {totalItems > itemsPerPage && (
+                <nav className="list-pagination" aria-label="Pagination équipements">
+                    <p className="list-pagination-meta">Page {currentPage} / {totalPages}</p>
+                    <div className="list-pagination-actions">
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setRequestedPage((page) => Math.max(1, page - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Précédent
+                        </button>
+                        <div className="list-pagination-pages">
+                            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                                <button
+                                    key={pageNumber}
+                                    type="button"
+                                    className={`btn-secondary ${pageNumber === currentPage ? 'btn-secondary-active' : ''}`}
+                                    onClick={() => setRequestedPage(pageNumber)}
+                                >
+                                    {pageNumber}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setRequestedPage((page) => Math.min(totalPages, page + 1))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                </nav>
+            )}
+
             <div className="table-wrap">
                 <table>
                     <thead>
@@ -232,14 +313,14 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                         </tr>
                     </thead>
                     <tbody>
-                        {equipment.displayedEquipmentList.length === 0 ? (
+                        {paginatedEquipmentList.length === 0 ? (
                             <tr>
                                 <td colSpan={8} className="empty-table-cell">
                                     Aucun équipement ne correspond à vos filtres.
                                 </td>
                             </tr>
                         ) : (
-                            equipment.displayedEquipmentList.map(renderEquipmentItem)
+                            paginatedEquipmentList.map(renderEquipmentItem)
                         )}
                     </tbody>
                 </table>

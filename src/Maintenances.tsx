@@ -12,6 +12,8 @@ interface MaintenancesProps {
 
 export default function Maintenances({ equipment, maintenance }: Readonly<MaintenancesProps>) {
     const [equipmentFilter, setEquipmentFilter] = useState('');
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [requestedPage, setRequestedPage] = useState(1);
 
     const displayedMaintenance = useMemo(() => {
         const filteredRecords = maintenance.maintenanceList.filter((record) => {
@@ -23,6 +25,14 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
 
         return [...filteredRecords].sort((left, right) => right.date.localeCompare(left.date));
     }, [equipmentFilter, maintenance.maintenanceList]);
+
+    const totalItems = displayedMaintenance.length;
+    const totalPages = useMemo(() => Math.max(1, Math.ceil(totalItems / itemsPerPage)), [itemsPerPage, totalItems]);
+    const currentPage = Math.min(requestedPage, totalPages);
+    const paginatedMaintenance = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return displayedMaintenance.slice(startIndex, startIndex + itemsPerPage);
+    }, [currentPage, displayedMaintenance, itemsPerPage]);
 
     function openAddForm() {
         const defaultEquipmentId = equipmentFilter === ''
@@ -100,7 +110,13 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
             <section className="maintenance-controls">
                 <label className="control-field">
                     <span>Filtrer par équipement</span>
-                    <select value={equipmentFilter} onChange={(event) => setEquipmentFilter(event.target.value)}>
+                    <select
+                        value={equipmentFilter}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            setEquipmentFilter(event.target.value);
+                        }}
+                    >
                         <option value="">Tous les équipements</option>
                         {equipment.equipmentList.map((item) => (
                             <option key={item.id} value={item.id}>
@@ -109,11 +125,63 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
                         ))}
                     </select>
                 </label>
+
+                <label className="control-field">
+                    <span>Par page</span>
+                    <select
+                        value={itemsPerPage}
+                        onChange={(event) => {
+                            setRequestedPage(1);
+                            setItemsPerPage(Number(event.target.value));
+                        }}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                    </select>
+                </label>
             </section>
 
             <p className="maintenance-results-count">
                 {displayedMaintenance.length} maintenance(s) affichée(s)
             </p>
+
+            {totalItems > itemsPerPage && (
+                <nav className="list-pagination" aria-label="Pagination maintenances">
+                    <p className="list-pagination-meta">Page {currentPage} / {totalPages}</p>
+                    <div className="list-pagination-actions">
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setRequestedPage((page) => Math.max(1, page - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Précédent
+                        </button>
+                        <div className="list-pagination-pages">
+                            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                                <button
+                                    key={pageNumber}
+                                    type="button"
+                                    className={`btn-secondary ${pageNumber === currentPage ? 'btn-secondary-active' : ''}`}
+                                    onClick={() => setRequestedPage(pageNumber)}
+                                >
+                                    {pageNumber}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setRequestedPage((page) => Math.min(totalPages, page + 1))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                </nav>
+            )}
 
             <div className="table-wrap">
                 <table className="maintenance-table">
@@ -131,14 +199,14 @@ export default function Maintenances({ equipment, maintenance }: Readonly<Mainte
                         </tr>
                     </thead>
                     <tbody>
-                        {displayedMaintenance.length === 0 ? (
+                        {paginatedMaintenance.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="maintenance-empty-table-cell">
                                     Aucune maintenance enregistrée pour ce filtre.
                                 </td>
                             </tr>
                         ) : (
-                            displayedMaintenance.map((record) => (
+                            paginatedMaintenance.map((record) => (
                                 <tr
                                     key={record.id}
                                     className="clickable-row"
