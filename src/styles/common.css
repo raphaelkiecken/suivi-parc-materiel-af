@@ -160,7 +160,34 @@ body.modal-open {
   overflow: hidden;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 @media (max-width: 700px) {
+  .modal-overlay {
+    padding: 0.25rem;
+    align-items: stretch;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 0.5rem);
+    border-radius: 12px;
+    padding: 0.8rem;
+    overflow-x: hidden;
+  }
+
+  .modal-header h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .modal-header-actions {
+    gap: 0.4rem;
+  }
+
   .btn-primary,
   .btn-secondary {
     min-height: 44px;
@@ -201,6 +228,10 @@ body.modal-open {
 
   .form-actions {
     flex-direction: column;
+  }
+
+  .list-pagination {
+    padding: 0.55rem;
   }
 
   .list-pagination-actions {
