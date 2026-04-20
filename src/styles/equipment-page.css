@@ -160,6 +160,96 @@
   font-style: italic;
 }
 
+.equipment-sheet-qr {
+  margin-top: 1rem;
+  border-top: 1px solid #d8edd9;
+  padding-top: 0.9rem;
+}
+
+.equipment-sheet-qr h4 {
+  margin: 0;
+  color: var(--green-700);
+  font-size: var(--subtitle-size);
+}
+
+.equipment-sheet-qr p {
+  margin: 0.35rem 0 0;
+  color: #36593a;
+}
+
+.equipment-sheet-qr-content {
+  margin-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.equipment-sheet-qr-content img {
+  width: 120px;
+  height: 120px;
+  border: 1px solid #d8edd9;
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.equipment-sheet-qr-content a {
+  color: var(--green-700);
+  font-weight: 600;
+}
+
+.equipment-public-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.equipment-public-card {
+  width: min(760px, 100%);
+  background: var(--white);
+  border: 1px solid #cde9d0;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(27, 94, 32, 0.08);
+  padding: 1rem;
+}
+
+.equipment-public-card h1 {
+  margin: 0;
+  color: var(--green-700);
+  font-size: var(--title-size);
+}
+
+.equipment-public-subtitle {
+  margin: 0.35rem 0 1rem;
+  color: #36593a;
+}
+
+.equipment-public-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.equipment-public-grid div {
+  background: #f8fcf8;
+  border: 1px solid #d8edd9;
+  border-radius: 10px;
+  padding: 0.65rem;
+}
+
+.equipment-public-grid dt {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green-700);
+}
+
+.equipment-public-grid dd {
+  margin: 0.2rem 0 0;
+  color: var(--text);
+}
+
 @media (max-width: 900px) {
   .equipment {
     margin: 1rem;
@@ -195,6 +285,11 @@
   .equipment-sheet-maintenance-actions {
     width: 100%;
     flex-direction: column;
+  }
+
+  .equipment-sheet-qr-content {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -259,5 +354,9 @@
 
   .equipment .empty-table-cell::before {
     content: none;
+  }
+
+  .equipment-public-grid {
+    grid-template-columns: 1fr;
   }
 }

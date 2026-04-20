@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import EquipmentForm from './components/EquipmentForm';
+import EquipmentPublicSheet from './EquipmentPublicSheet';
 import MaintenanceForm from './components/MaintenanceForm';
 import Equipment from './Equipment';
 import Maintenances from './Maintenances';
@@ -221,6 +222,7 @@ export default function App() {
     const maintenance = useMaintenance();
     const location = useLocation();
     const [isDashboardSheetMaintenanceVisible, setIsDashboardSheetMaintenanceVisible] = useState(false);
+    const isPublicEquipmentSheetRoute = location.pathname.startsWith('/fiche/equipement/');
 
     function toggleDashboardSheetMaintenanceVisibility() {
         setIsDashboardSheetMaintenanceVisible((currentValue) => {
@@ -388,28 +390,34 @@ export default function App() {
 
     return (
         <div>
-            <div className="app-nav">
-                <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
-                >
-                    Dashboard
-                </NavLink>
-                <NavLink
-                    to="/equipements"
-                    className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
-                >
-                    Equipements
-                </NavLink>
-                <NavLink
-                    to="/maintenances"
-                    className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
-                >
-                    Maintenances
-                </NavLink>
-            </div>
+            {!isPublicEquipmentSheetRoute && (
+                <div className="app-nav">
+                    <NavLink
+                        to="/dashboard"
+                        className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
+                    >
+                        Dashboard
+                    </NavLink>
+                    <NavLink
+                        to="/equipements"
+                        className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
+                    >
+                        Equipements
+                    </NavLink>
+                    <NavLink
+                        to="/maintenances"
+                        className={({ isActive }) => `app-nav-btn ${isActive ? 'app-nav-btn-active' : ''}`}
+                    >
+                        Maintenances
+                    </NavLink>
+                </div>
+            )}
 
             <Routes>
+                <Route
+                    path="/fiche/equipement/:equipmentId"
+                    element={<EquipmentPublicSheet equipmentList={equipment.equipmentList} />}
+                />
                 <Route
                     path="/dashboard"
                     element={
@@ -434,8 +442,8 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
 
-            {renderDashboardEquipmentSheetModal()}
-            {renderGlobalMaintenanceModal()}
+            {!isPublicEquipmentSheetRoute && renderDashboardEquipmentSheetModal()}
+            {!isPublicEquipmentSheetRoute && renderGlobalMaintenanceModal()}
         </div>
     );
 }
