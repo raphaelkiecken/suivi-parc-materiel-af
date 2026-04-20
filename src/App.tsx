@@ -416,7 +416,12 @@ export default function App() {
             <Routes>
                 <Route
                     path="/fiche/equipement/:equipmentId"
-                    element={<EquipmentPublicSheet equipmentList={equipment.equipmentList} />}
+                    element={
+                        <EquipmentPublicSheet
+                            equipmentList={equipment.equipmentList}
+                            maintenanceList={maintenance.maintenanceList}
+                        />
+                    }
                 />
                 <Route
                     path="/dashboard"

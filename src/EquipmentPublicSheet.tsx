@@ -1,24 +1,36 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import type { EquipmentItem } from './types/equipment';
+import type { EquipmentItem, MaintenanceRecord } from './types/equipment';
 import { formatDate } from './utils/dateUtils';
 import './styles/equipment-page.css';
 
 interface EquipmentPublicSheetProps {
     equipmentList: EquipmentItem[];
+    maintenanceList: MaintenanceRecord[];
 }
 
-export default function EquipmentPublicSheet({ equipmentList }: Readonly<EquipmentPublicSheetProps>) {
+export default function EquipmentPublicSheet({ equipmentList, maintenanceList }: Readonly<EquipmentPublicSheetProps>) {
     const { equipmentId } = useParams();
 
+    const parsedEquipmentId = Number(equipmentId);
+
     const equipment = useMemo(() => {
-        const parsedId = Number(equipmentId);
-        if (Number.isNaN(parsedId)) {
+        if (Number.isNaN(parsedEquipmentId)) {
             return null;
         }
 
-        return equipmentList.find((item) => item.id === parsedId) ?? null;
-    }, [equipmentId, equipmentList]);
+        return equipmentList.find((item) => item.id === parsedEquipmentId) ?? null;
+    }, [parsedEquipmentId, equipmentList]);
+
+    const equipmentMaintenances = useMemo(() => {
+        if (Number.isNaN(parsedEquipmentId)) {
+            return [];
+        }
+
+        return maintenanceList
+            .filter((record) => record.equipmentId === parsedEquipmentId)
+            .sort((left, right) => right.date.localeCompare(left.date));
+    }, [maintenanceList, parsedEquipmentId]);
 
     if (!equipment) {
         return (
@@ -71,6 +83,24 @@ export default function EquipmentPublicSheet({ equipmentList }: Readonly<Equipme
                         <dd>{equipment.position}</dd>
                     </div>
                 </dl>
+
+                <section className="equipment-sheet-maintenance">
+                    <div className="equipment-sheet-maintenance-header">
+                        <h4>Historique des maintenances ({equipmentMaintenances.length})</h4>
+                    </div>
+
+                    {equipmentMaintenances.length === 0 ? (
+                        <p className="equipment-sheet-maintenance-empty">Aucune maintenance enregistrée pour cet équipement.</p>
+                    ) : (
+                        <ul className="equipment-sheet-maintenance-list">
+                            {equipmentMaintenances.map((record) => (
+                                <li key={record.id}>
+                                    <strong>{formatDate(record.date)}</strong> - {record.interventionType} ({record.interventionStatus}) - {record.description} - {record.downtimeMinutes} min
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
             </article>
         </main>
     );
