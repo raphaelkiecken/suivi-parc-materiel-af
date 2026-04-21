@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import EquipmentForm from './components/EquipmentForm';
-import EquipmentPublicSheet from './EquipmentPublicSheet';
+import EquipmentPublicSheet from './EquipmentPublicSheet.tsx';
 import MaintenanceForm from './components/MaintenanceForm';
 import Equipment from './Equipment';
 import Maintenances from './Maintenances';
@@ -416,12 +416,7 @@ export default function App() {
             <Routes>
                 <Route
                     path="/fiche/equipement/:equipmentId"
-                    element={
-                        <EquipmentPublicSheet
-                            equipmentList={equipment.equipmentList}
-                            maintenanceList={maintenance.maintenanceList}
-                        />
-                    }
+                    element={<EquipmentPublicSheet />}
                 />
                 <Route
                     path="/dashboard"

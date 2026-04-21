@@ -1,12 +1,23 @@
-import { useMemo, useState, type ChangeEvent, type SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState, type ChangeEvent, type SyntheticEvent } from 'react';
 import type { EquipmentItem, EquipmentFormData } from '../types/equipment';
-import { initialEquipmentData, emptyEquipmentFormData } from '../data/initialData';
+import { createEquipment, fetchEquipmentList, updateEquipment } from '../services/equipmentApi';
 
 export type SortField = 'purchaseDate' | 'warrantyExpiration';
 export type SortDirection = 'asc' | 'desc';
 
+const emptyEquipmentFormData: EquipmentFormData = {
+    name: '',
+    brand: '',
+    model: '',
+    serialNumber: '',
+    purchaseDate: '',
+    warrantyExpiration: '',
+    status: '',
+    position: ''
+};
+
 export function useEquipment() {
-    const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialEquipmentData);
+    const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>([]);
     const [isEquipmentFormOpen, setIsEquipmentFormOpen] = useState(false);
     const [isReadOnlyEquipmentModal, setIsReadOnlyEquipmentModal] = useState(false);
     const [editingEquipmentId, setEditingEquipmentId] = useState<number | null>(null);
@@ -15,6 +26,38 @@ export function useEquipment() {
     const [locationFilter, setLocationFilter] = useState('');
     const [sortField, setSortField] = useState<SortField>('purchaseDate');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [isLoadingEquipment, setIsLoadingEquipment] = useState(true);
+    const [equipmentError, setEquipmentError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function loadEquipment() {
+            setIsLoadingEquipment(true);
+            setEquipmentError(null);
+
+            try {
+                const records = await fetchEquipmentList();
+                if (!isCancelled) {
+                    setEquipmentList(records);
+                }
+            } catch {
+                if (!isCancelled) {
+                    setEquipmentError('Impossible de charger les équipements depuis le serveur.');
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoadingEquipment(false);
+                }
+            }
+        }
+
+        void loadEquipment();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
 
     const isEditingEquipment = editingEquipmentId !== null;
     const availableLocations = useMemo(
@@ -113,7 +156,7 @@ export function useEquipment() {
         setSortDirection('desc');
     }
 
-    function handleEquipmentSubmit(event: SyntheticEvent<HTMLFormElement>) {
+    async function handleEquipmentSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (isReadOnlyEquipmentModal) {
@@ -122,22 +165,13 @@ export function useEquipment() {
         }
 
         if (isEditingEquipment && editingEquipmentId !== null) {
+            const updated = await updateEquipment(editingEquipmentId, equipmentFormData);
             setEquipmentList((currentList) =>
-                currentList.map((item) =>
-                    item.id === editingEquipmentId
-                        ? { id: item.id, ...equipmentFormData }
-                        : item
-                )
+                currentList.map((item) => (item.id === updated.id ? updated : item))
             );
         } else {
-            const nextId = equipmentList.length > 0
-                ? Math.max(...equipmentList.map((item) => item.id)) + 1
-                : 1;
-
-            setEquipmentList((currentList) => [
-                ...currentList,
-                { id: nextId, ...equipmentFormData }
-            ]);
+            const created = await createEquipment(equipmentFormData);
+            setEquipmentList((currentList) => [...currentList, created]);
         }
 
         closeEquipmentForm();
@@ -156,6 +190,8 @@ export function useEquipment() {
         locationFilter,
         sortField,
         sortDirection,
+        isLoadingEquipment,
+        equipmentError,
         openAddEquipmentForm,
         openEditEquipmentForm,
         openReadOnlyEquipmentForm,

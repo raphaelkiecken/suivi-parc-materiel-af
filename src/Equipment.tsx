@@ -169,12 +169,6 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
         }
 
         const currentEquipmentId = equipment.editingEquipmentId;
-        const publicEquipmentUrl = currentEquipmentId === null
-            ? ''
-            : `${window.location.origin}/fiche/equipement/${currentEquipmentId}`;
-        const qrCodeImageUrl = publicEquipmentUrl === ''
-            ? ''
-            : `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicEquipmentUrl)}`;
         const equipmentMaintenances = currentEquipmentId === null
             ? []
             : maintenanceList
@@ -222,19 +216,6 @@ export default function Equipment({ equipment, maintenanceList, onAddMaintenance
                         </div>
                     </div>
                     <EquipmentForm equipment={equipment} onCancel={equipment.closeEquipmentForm} />
-
-                    {currentEquipmentId !== null && (
-                        <section className="equipment-sheet-qr">
-                            <h4>Accès direct fiche (QR)</h4>
-                            <p>Scannez ce QR code pour ouvrir uniquement la fiche de cet équipement.</p>
-                            <div className="equipment-sheet-qr-content">
-                                <img src={qrCodeImageUrl} alt="QR code d'accès direct à la fiche équipement" />
-                                <a href={publicEquipmentUrl} target="_blank" rel="noreferrer">
-                                    Ouvrir la fiche directe
-                                </a>
-                            </div>
-                        </section>
-                    )}
 
                     {currentEquipmentId !== null && (
                         <section className="equipment-sheet-maintenance">

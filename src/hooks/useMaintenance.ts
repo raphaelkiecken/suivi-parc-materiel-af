@@ -1,15 +1,58 @@
-import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, type SyntheticEvent } from 'react';
 import type { MaintenanceRecord, MaintenanceFormData } from '../types/equipment';
-import { initialMaintenanceData, emptyMaintenanceFormData } from '../data/initialData';
+import { createMaintenance, fetchMaintenanceList, updateMaintenance } from '../services/maintenanceApi';
+
+const emptyMaintenanceFormData: MaintenanceFormData = {
+    date: '',
+    interventionType: 'Préventive',
+    interventionStatus: 'Planifiée',
+    description: '',
+    performedBy: '',
+    downtimeMinutes: 0,
+    notes: '',
+    cost: 0
+};
 
 export function useMaintenance() {
-    const [maintenanceList, setMaintenanceList] = useState<MaintenanceRecord[]>(initialMaintenanceData);
+    const [maintenanceList, setMaintenanceList] = useState<MaintenanceRecord[]>([]);
     const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
     const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(null);
     const [isMaintenanceFormOpen, setIsMaintenanceFormOpen] = useState(false);
     const [isReadOnlyMaintenanceModal, setIsReadOnlyMaintenanceModal] = useState(false);
     const [editingMaintenanceId, setEditingMaintenanceId] = useState<number | null>(null);
     const [maintenanceFormData, setMaintenanceFormData] = useState<MaintenanceFormData>(emptyMaintenanceFormData);
+    const [isLoadingMaintenance, setIsLoadingMaintenance] = useState(true);
+    const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function loadMaintenances() {
+            setIsLoadingMaintenance(true);
+            setMaintenanceError(null);
+
+            try {
+                const records = await fetchMaintenanceList();
+                if (!isCancelled) {
+                    setMaintenanceList(records);
+                }
+            } catch {
+                if (!isCancelled) {
+                    setMaintenanceError('Impossible de charger les maintenances depuis le serveur.');
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoadingMaintenance(false);
+                }
+            }
+        }
+
+        void loadMaintenances();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
 
     const isEditingMaintenance = editingMaintenanceId !== null;
 
@@ -81,7 +124,7 @@ export function useMaintenance() {
         }));
     }
 
-    function handleMaintenanceSubmit(event: SyntheticEvent<HTMLFormElement>) {
+    async function handleMaintenanceSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (isReadOnlyMaintenanceModal) {
@@ -89,22 +132,13 @@ export function useMaintenance() {
         }
 
         if (isEditingMaintenance && editingMaintenanceId !== null) {
+            const updated = await updateMaintenance(editingMaintenanceId, maintenanceFormData);
             setMaintenanceList((currentList) =>
-                currentList.map((item) =>
-                    item.id === editingMaintenanceId
-                        ? { id: item.id, equipmentId: item.equipmentId, ...maintenanceFormData }
-                        : item
-                )
+                currentList.map((item) => (item.id === updated.id ? updated : item))
             );
         } else if (selectedEquipmentId) {
-            const nextId = maintenanceList.length > 0
-                ? Math.max(...maintenanceList.map((item) => item.id)) + 1
-                : 1;
-
-            setMaintenanceList((currentList) => [
-                ...currentList,
-                { id: nextId, equipmentId: selectedEquipmentId, ...maintenanceFormData }
-            ]);
+            const created = await createMaintenance({ equipmentId: selectedEquipmentId, ...maintenanceFormData });
+            setMaintenanceList((currentList) => [...currentList, created]);
         }
 
         setIsMaintenanceFormOpen(false);
@@ -127,6 +161,8 @@ export function useMaintenance() {
         editingMaintenanceId,
         maintenanceFormData,
         isEditingMaintenance,
+        isLoadingMaintenance,
+        maintenanceError,
         openMaintenanceModal,
         closeMaintenanceModal,
         openAddMaintenanceForm,
